@@ -60,7 +60,7 @@ void showTokens(vector <token> y)
     myfile.open("Scanner_Output.txt");
     for (auto it = y.begin(); it != y.end(); it++)
     {
-        myfile << "(" << it->data << ", " << it-> type << ")" << "\n";
+        myfile << it->data << "," << it-> type << "\n";
     }
     myfile.close();
 }
@@ -120,13 +120,15 @@ bool Store_Speccial_character_Or_space(char x)
         break;
 
     case ' ':
-        y.type = "SPACE";
         break;
 
     default:
         break;
     }
-    Tokens_storage.push_back(y);
+    if (x != ' ')
+    {
+        Tokens_storage.push_back(y);
+    }
     return true;
 }
 

@@ -1,14 +1,12 @@
 #pragma once 
 #include "syntaxTree.hpp"
 #include <vector>
+#include <set>
 
 class Parser
 {
-    public:
-        SyntaxTree* syntaxTree = nullptr;
-        std::vector<Token*>tokens;
-        unsigned int index;
     private:
+        unsigned int index;
         SyntaxTree* program();
         SyntaxTree* stmt_sequence();
         SyntaxTree* statement();
@@ -25,4 +23,9 @@ class Parser
         SyntaxTree* mulop();
         SyntaxTree* factor();
         void match(TokenType tokenType);
+
+    public:
+        SyntaxTree* syntaxTree = nullptr;
+        std::vector<Token*>tokens;
+        std::set<unsigned int>errors;
 };
