@@ -5,8 +5,7 @@
 /* Rule: program → stmt-sequence */
 SyntaxTree* Parser::program()
 {
-    SyntaxTree* programTree = new SyntaxTree();
-    programTree = stmt_sequence();
+    SyntaxTree* programTree = stmt_sequence();
     return programTree;
 }
 
@@ -16,12 +15,11 @@ SyntaxTree* Parser::program()
 */
 SyntaxTree* Parser::stmt_sequence()
 {
-    SyntaxTree* stmtSequenceTree = new SyntaxTree();
-    stmtSequenceTree->childs.push_back(statement());
+    SyntaxTree* stmtSequenceTree = statement();
     while( SEMICOLON == tokens[index]->type )
     {
         match(SEMICOLON);
-        stmtSequenceTree->childs.push_back(statement());
+        stmtSequenceTree = statement();
     }
     return stmtSequenceTree;
 }
@@ -29,28 +27,28 @@ SyntaxTree* Parser::stmt_sequence()
 /* Rule: statement → if-stmt | repeat-stmt | assign-stmt | read-stmt | write-stmt */
 SyntaxTree* Parser::statement()
 {
-    SyntaxTree* statementTree = new SyntaxTree();
+    SyntaxTree* statementTree;
     /* check the possible first tokens of each type of statement rule */
     switch(tokens[index]->type)
     {
         case IF:
-            statementTree->childs.push_back(if_stmt());
+            statementTree = if_stmt();
             break;
 
         case REPEAT:
-            statementTree->childs.push_back(repeat_stmt());
+            statementTree = repeat_stmt();
             break;
 
         case IDENTIFIER:
-            statementTree->childs.push_back(assign_stmt());
+            statementTree = assign_stmt();
             break;
 
         case READ:
-            statementTree->childs.push_back(read_stmt());
+            statementTree = read_stmt();
             break;
 
         case WRITE:
-            statementTree->childs.push_back(write_stmt());
+            statementTree = write_stmt();
             break;
 
         default:
@@ -68,16 +66,17 @@ SyntaxTree* Parser::statement()
 SyntaxTree* Parser::if_stmt()
 {
     SyntaxTree* ifStmtTree = new SyntaxTree();
+    ifStmtTree->add_node_data(IF_STATEMENT, "if");
     match(IF);
-    ifStmtTree->childs.push_back(exp());
+    ifStmtTree->add_child(exp());                   /* Test child */
     match(THEN);
-    ifStmtTree->childs.push_back(stmt_sequence());
+    ifStmtTree->add_child(stmt_sequence());         /* Then child */
     if(ELSE == tokens[index]->type)
     {
         match(ELSE);
-        ifStmtTree->childs.push_back(stmt_sequence());
-        match(END);
+        ifStmtTree->add_child(stmt_sequence());     /* Else child if exists */
     }
+    match(END);
     return ifStmtTree;
 }
 
@@ -85,21 +84,23 @@ SyntaxTree* Parser::if_stmt()
 SyntaxTree* Parser::repeat_stmt()
 {
     SyntaxTree* repeatStmtTree = new SyntaxTree();
+    repeatStmtTree->add_node_data(READ_STATEMENT, "REPEAT");
     match(REPEAT);
-    repeatStmtTree->childs.push_back(stmt_sequence());
+    repeatStmtTree->add_child(stmt_sequence());     /* Body child */
     match(UNTIL);
-    repeatStmtTree->childs.push_back(exp());
+    repeatStmtTree->add_child(exp());               /* Test child */
     return repeatStmtTree;
 }
 
 
 /* Rule: assign-stmt → identifier := exp */
-SyntaxTree* Parser::exp()
+SyntaxTree* Parser::assign_stmt()
 {
     SyntaxTree* expTree = new SyntaxTree();
+    expTree->add_node_data(ASSIGN_STATEMENT, ":=");
     match(IDENTIFIER);
     match(ASSIGN);
-    expTree->childs.push_back(exp());
+    expTree->add_child(exp());              /* Exp child */
     return expTree;
 }
 
@@ -108,6 +109,7 @@ SyntaxTree* Parser::read_stmt()
 {
     SyntaxTree* readStmtTree = new SyntaxTree();
     match(READ);
+    readStmtTree->add_node_data(READ_STATEMENT, tokens[index]->value);
     match(IDENTIFIER);
     return readStmtTree;
 }

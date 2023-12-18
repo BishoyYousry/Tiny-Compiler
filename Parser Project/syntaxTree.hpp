@@ -1,29 +1,22 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <string>
+
+typedef enum{
+    NO_EXPRESSION,
+    OPERATOR_EXPRESSION,
+    CONSTANT_EXPRESSION,
+    IDENTIFIER_EXPRESSION,
+    ASSIGN_STATEMENT,
+    IF_STATEMENT,
+    REPEAT_STATEMENT,
+    READ_STATEMENT,
+    WRITE_STATEMENT
+}NodeType;
 
 
-typedef enum RuleType
-{
-    PROGRAM,
-    STMT_SEQUENCE,
-    STATEMENT,
-    IF_STMT,
-    REPEAT_STMT,
-    ASSIGN_STMT,
-    READ_STMT,
-    WRITE_STMT,
-    EXP,
-    SIMPLE_EXP,
-    COMPARISON_OP,
-    ADDOP,
-    TERM,
-    MULOP,
-    FACTOR,
-};
-
-
-typedef enum TokenType
+typedef enum
 {
     SEMICOLON,
     IF,
@@ -45,16 +38,27 @@ typedef enum TokenType
     OPENBRACKET,
     CLOSEDBRACKET,
     NUMBER,
-};
+}TokenType;
 
-typedef struct Token
+typedef struct 
 {
-    std::string data;
+    NodeType type;
+    std::string value;
+}NodeData;
+
+
+typedef struct
+{
+    std::string value;
     TokenType type;
-}; 
+}Token; 
 
 class SyntaxTree
 {
-    public:
+    private:
         std::vector<SyntaxTree*> childs;
+        NodeData nodeData;
+    public:
+        void add_child(SyntaxTree* child);
+        void add_node_data(NodeType type, std::string value);
 };
