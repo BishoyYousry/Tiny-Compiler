@@ -38,6 +38,7 @@ typedef enum
     OPENBRACKET,
     CLOSEDBRACKET,
     NUMBER,
+    EMPTY               /* Just to indicate the end of tokens */
 }TokenType;
 
 typedef struct 
@@ -49,8 +50,8 @@ typedef struct
 
 typedef struct
 {
-    std::string value;
     TokenType type;
+    std::string value;
 }Token; 
 
 class SyntaxTree

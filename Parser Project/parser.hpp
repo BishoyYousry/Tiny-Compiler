@@ -6,8 +6,8 @@
 class Parser
 {
     private:
+        bool end = false;
         unsigned int index;
-        SyntaxTree* program();
         SyntaxTree* stmt_sequence();
         SyntaxTree* statement();
         SyntaxTree* if_stmt();
@@ -28,4 +28,5 @@ class Parser
         SyntaxTree* syntaxTree = nullptr;
         std::vector<Token*>tokens;
         std::set<unsigned int>errors;
+        SyntaxTree* program();
 };

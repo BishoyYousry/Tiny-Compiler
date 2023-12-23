@@ -16,7 +16,7 @@ SyntaxTree* Parser::program()
 SyntaxTree* Parser::stmt_sequence()
 {
     SyntaxTree* stmtSequenceTree = statement();
-    while( SEMICOLON == tokens[index]->type )
+    while(index < tokens.size() && SEMICOLON == tokens[index]->type)
     {
         match(SEMICOLON);
         stmtSequenceTree = statement();
@@ -29,31 +29,32 @@ SyntaxTree* Parser::statement()
 {
     SyntaxTree* statementTree = nullptr;
     /* check the possible first tokens of each type of statement rule */
-    switch(tokens[index]->type)
+    
+    switch (tokens[index]->type)
     {
-        case IF:
-            statementTree = if_stmt();
-            break;
+    case IF:
+        statementTree = if_stmt();
+        break;
 
-        case REPEAT:
-            statementTree = repeat_stmt();
-            break;
+    case REPEAT:
+        statementTree = repeat_stmt();
+        break;
 
-        case IDENTIFIER:
-            statementTree = assign_stmt();
-            break;
+    case IDENTIFIER:
+        statementTree = assign_stmt();
+        break;
 
-        case READ:
-            statementTree = read_stmt();
-            break;
+    case READ:
+        statementTree = read_stmt();
+        break;
 
-        case WRITE:
-            statementTree = write_stmt();
-            break;
+    case WRITE:
+        statementTree = write_stmt();
+        break;
 
-        default:
-            errors.insert(index);
-            break;
+    default:
+        errors.insert(index);
+        break;
     }
     return statementTree;
 }
@@ -97,7 +98,7 @@ SyntaxTree* Parser::repeat_stmt()
 SyntaxTree* Parser::assign_stmt()
 {
     SyntaxTree* assignStmtTree = new SyntaxTree();
-    assignStmtTree->add_node_data(ASSIGN_STATEMENT, ":=");
+    assignStmtTree->add_node_data(ASSIGN_STATEMENT, tokens[index]->value);
     match(IDENTIFIER);
     match(ASSIGN);
     assignStmtTree->add_child(exp());              /* Exp child */
@@ -125,7 +126,7 @@ SyntaxTree* Parser::write_stmt()
 }
 
 /* Rule: exp → simple-exp comparison-op simple-exp | simple-exp
-   EBNF: simple-exp [comparison-op simple-exp]
+   EBNF: exp → simple-exp [comparison-op simple-exp]
 */
 SyntaxTree* Parser::exp()
 {
@@ -243,20 +244,19 @@ SyntaxTree* Parser::factor()
     {
         match(OPENBRACKET);
         factorTree = exp();
-        factorTree->add_node_data(NO_EXPRESSION, tokens[index]->value);
         match(CLOSEDBRACKET);
     }
     else if (NUMBER == tokens[index]->type)
     {
         match(NUMBER);
         factorTree = new SyntaxTree();
-        factorTree->add_node_data(NO_EXPRESSION, tokens[index]->value);
+        factorTree->add_node_data(CONSTANT_EXPRESSION, tokens[index]->value);
     }
     else if (IDENTIFIER == tokens[index]->type)
     {
         match(IDENTIFIER);
         factorTree = new SyntaxTree();
-        factorTree->add_node_data(NO_EXPRESSION, tokens[index]->value);
+        factorTree->add_node_data(IDENTIFIER_EXPRESSION, tokens[index]->value);
     }
     else
     {
@@ -273,6 +273,10 @@ void Parser::match(TokenType tokenType)
         if(index < tokens.size() - 1)
         {
             index++;
+        }
+        else
+        {
+            tokens[index]->type = EMPTY;
         }
     }
     else
