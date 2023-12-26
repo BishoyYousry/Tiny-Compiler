@@ -1,32 +1,41 @@
-#pragma once 
-#include "syntaxTree.hpp"
-#include <vector>
-#include <set>
+#pragma once
+
+#include "scanner.hpp"
+#include "SyntaxTree.hpp"
+#include <stdio.h>
+
 
 class Parser
 {
-    private:
-        bool end = false;
-        unsigned int index;
-        SyntaxTree* stmt_sequence();
-        SyntaxTree* statement();
-        SyntaxTree* if_stmt();
-        SyntaxTree* repeat_stmt();
-        SyntaxTree* assign_stmt();
-        SyntaxTree* read_stmt();
-        SyntaxTree* write_stmt();
-        SyntaxTree* exp();
-        SyntaxTree* comparison_op();
-        SyntaxTree* simple_exp();
-        SyntaxTree* addop();
-        SyntaxTree* term();
-        SyntaxTree* mulop();
-        SyntaxTree* factor();
-        void match(TokenType tokenType);
+private:
+    SyntaxTree *syntaxTree = nullptr;
+    bool error = false;
+    unsigned int index = 0;
+    Token token;
 
-    public:
-        SyntaxTree* syntaxTree = nullptr;
-        std::vector<Token*>tokens;
-        std::set<unsigned int>errors;
-        SyntaxTree* program();
+    SyntaxTree* stmt_sequence (std::vector<Token> Tokens);
+    SyntaxTree* statement (std::vector<Token> Tokens);
+    SyntaxTree* if_stmt (std::vector<Token> Tokens);
+    SyntaxTree* repeat_stmt (std::vector<Token> Tokens);
+    SyntaxTree* assign_stmt (std::vector<Token> Tokens);
+    SyntaxTree* read_stmt (std::vector<Token> Tokens);
+    SyntaxTree* write_stmt (std::vector<Token> Tokens);
+    SyntaxTree* exp (std::vector<Token> Tokens);
+    SyntaxTree* comparison_op (std::vector<Token> Tokens);
+    SyntaxTree* simple_exp(std::vector<Token> Tokens);
+    SyntaxTree* addop(std::vector<Token> Tokens);
+    SyntaxTree* term(std::vector<Token> Tokens);
+    SyntaxTree* mulop(std::vector<Token> Tokens);
+    SyntaxTree* factor(std::vector<Token> Tokens);
+    void match(QString input, std::vector<Token> Tokens);
+
+public:
+    Parser();
+    SyntaxTree* program (std::vector<Token> Tokens);
+    //Takes a string of TINY-language code and constructs the parse tree in its private member "syntaxTree"
+    void parseString(QString code);
+    std::set<int> err;
+    SyntaxTree *getOutputTree()  ;
+    bool getError() const;
 };
+

@@ -1,286 +1,398 @@
 #include "parser.hpp"
-#include "syntaxTree.hpp"
-#include <iostream>
+#include <QString>
+
+
+Parser::Parser()
+{
+    error=false;
+}
+
+
 
 /* Rule: program → stmt-sequence */
-SyntaxTree* Parser::program()
-{
-    SyntaxTree* programTree = stmt_sequence();
+SyntaxTree* Parser::program (std::vector<Token> Tokens){
+
+    SyntaxTree* programTree = stmt_sequence(Tokens);
+    if (index < Tokens.size()-1) {
+        std:: cout<<"error"<<std::endl;
+        error = true;
+        err.insert(index);
+    }
     return programTree;
 }
+
 
 /*
     Rule: stmt-sequence → stmt-sequence ; statement | statement
     EBNF: stmt-sequence → statement {; statement}
 */
-SyntaxTree* Parser::stmt_sequence()
-{
-    SyntaxTree* stmtSequenceTree = statement();
-    while(index < tokens.size() && SEMICOLON == tokens[index]->type)
-    {
-        match(SEMICOLON);
-        stmtSequenceTree = statement();
+SyntaxTree* Parser::stmt_sequence (std::vector<Token> Tokens){
+    SyntaxTree *stmtSequenceTree = new SyntaxTree();
+
+    stmtSequenceTree = statement(Tokens);
+
+    SyntaxTree *current = new SyntaxTree();
+
+    current = stmtSequenceTree;
+
+    Token x;
+    if(index < Tokens.size()){
+
+        x = Tokens[index];
+    }
+
+    while (x.Type == "SEMICOLON" && index != Tokens.size()-1){
+
+        match("SEMICOLON",Tokens);
+
+        current->setSibling(statement(Tokens));
+
+        current = current->getSibling();
+
+        if(index<Tokens.size()){
+            x = Tokens[index];
+
+        }
+        else
+            break;
+
     }
     return stmtSequenceTree;
 }
 
+
+
 /* Rule: statement → if-stmt | repeat-stmt | assign-stmt | read-stmt | write-stmt */
-SyntaxTree* Parser::statement()
-{
-    SyntaxTree* statementTree = nullptr;
-    /* check the possible first tokens of each type of statement rule */
-    
-    switch (tokens[index]->type)
-    {
-    case IF:
-        statementTree = if_stmt();
-        break;
-
-    case REPEAT:
-        statementTree = repeat_stmt();
-        break;
-
-    case IDENTIFIER:
-        statementTree = assign_stmt();
-        break;
-
-    case READ:
-        statementTree = read_stmt();
-        break;
-
-    case WRITE:
-        statementTree = write_stmt();
-        break;
-
-    default:
-        errors.insert(index);
-        break;
+SyntaxTree* Parser::statement (std::vector<Token> Tokens){
+    SyntaxTree* statementTree = NULL;
+    Token current_token;
+    if(index < Tokens.size())
+        current_token = Tokens[index];
+    if( current_token.Type == "IF" ){
+        statementTree = if_stmt(Tokens);
+    } else if(current_token.Type == "IDENTIFIER"){
+        statementTree = assign_stmt(Tokens);
+    } else if (current_token.Type == "READ")
+        statementTree = read_stmt(Tokens);
+    else if (current_token.Type == "WRITE")
+        statementTree = write_stmt(Tokens);
+    else if (current_token.Type == "REPEAT")
+        statementTree = repeat_stmt(Tokens);
+    else{
+        error = true;
+        err.insert(index);
     }
     return statementTree;
 }
+
 
 
 /*
     Rule: if-stmt → if exp then stmt-sequence end | if exp then stmt-sequence else stmt-sequence end
     EBNF: if-stmt → if exp then stmt-sequence [else stmt-sequence] end
 */
-SyntaxTree* Parser::if_stmt()
-{
-    SyntaxTree* ifStmtTree = new SyntaxTree();
-    ifStmtTree->add_node_data(IF_STATEMENT, "if");
-    match(IF);
-    ifStmtTree->add_child(exp());                   /* Test child */
-    match(THEN);
-    ifStmtTree->add_child(stmt_sequence());         /* Then child */
-    if(ELSE == tokens[index]->type)
-    {
-        match(ELSE);
-        ifStmtTree->add_child(stmt_sequence());     /* Else child if exists */
+SyntaxTree* Parser::if_stmt (std::vector<Token> Tokens){
+    SyntaxTree *ifStmtTree = new SyntaxTree();
+    ifStmtTree->setType(IF_STATEMENT);
+    match("IF",Tokens);
+    ifStmtTree->addChild(exp(Tokens));
+    match("THEN",Tokens);
+    ifStmtTree->addChild(stmt_sequence(Tokens));
+    Token x;
+    if(index<Tokens.size()){
+        x = Tokens[index];
     }
-    match(END);
+    if(x.Type == "ELSE"){
+        match("ELSE",Tokens);
+        ifStmtTree->addChild(stmt_sequence(Tokens));
+    }
+    match("END",Tokens);
     return ifStmtTree;
 }
 
+
 /* Rule: repeat-stmt → repeat stmt-sequence until exp */
-SyntaxTree* Parser::repeat_stmt()
-{
+SyntaxTree* Parser::repeat_stmt (std::vector<Token> Tokens){
     SyntaxTree* repeatStmtTree = new SyntaxTree();
-    repeatStmtTree->add_node_data(REPEAT_STATEMENT, "REPEAT");
-    match(REPEAT);
-    repeatStmtTree->add_child(stmt_sequence());     /* Body child */
-    match(UNTIL);
-    repeatStmtTree->add_child(exp());               /* Test child */
+    match("REPEAT", Tokens);
+    repeatStmtTree->setType(REPEAT_STATEMENT);
+    repeatStmtTree->addChild(stmt_sequence(Tokens));
+    match("UNTIL", Tokens);
+    repeatStmtTree->addChild(exp(Tokens));
     return repeatStmtTree;
 }
 
 
+
 /* Rule: assign-stmt → identifier := exp */
-SyntaxTree* Parser::assign_stmt()
-{
+SyntaxTree* Parser::assign_stmt (std::vector<Token> Tokens){
     SyntaxTree* assignStmtTree = new SyntaxTree();
-    assignStmtTree->add_node_data(ASSIGN_STATEMENT, tokens[index]->value);
-    match(IDENTIFIER);
-    match(ASSIGN);
-    assignStmtTree->add_child(exp());              /* Exp child */
+    assignStmtTree->setType(ASSIGN_STATEMENT);
+    assignStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
+    match("IDENTIFIER",Tokens);
+    match("ASSIGN", Tokens);
+    assignStmtTree->addChild(exp(Tokens));
     return assignStmtTree;
 }
 
+
+
 /* Rule: read-stmt → read identifier */
-SyntaxTree* Parser::read_stmt()
-{
-    SyntaxTree* readStmtTree = new SyntaxTree();
-    match(READ);
-    readStmtTree->add_node_data(READ_STATEMENT, tokens[index]->value);
-    match(IDENTIFIER);
+SyntaxTree* Parser::read_stmt (std::vector<Token> Tokens){
+    match("READ",Tokens);
+    SyntaxTree *readStmtTree = new SyntaxTree();
+    readStmtTree->setType(READ_STATEMENT);
+    readStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
+    match("IDENTIFIER",Tokens);
     return readStmtTree;
 }
 
+
+
 /* Rule: write-stmt → write exp */
-SyntaxTree* Parser::write_stmt()
-{
-    SyntaxTree* writeStmtTree = new SyntaxTree();
-    match(WRITE);
-    writeStmtTree->add_node_data(WRITE_STATEMENT, "WRITE");
-    writeStmtTree->add_child(exp());
+SyntaxTree* Parser::write_stmt (std::vector<Token> Tokens){
+    SyntaxTree *writeStmtTree= new SyntaxTree();
+    writeStmtTree->setType(WRITE_STATEMENT);
+    match("WRITE",Tokens);
+    writeStmtTree->addChild(exp(Tokens));
     return writeStmtTree;
 }
+
+
 
 /* Rule: exp → simple-exp comparison-op simple-exp | simple-exp
    EBNF: exp → simple-exp [comparison-op simple-exp]
 */
-SyntaxTree* Parser::exp()
-{
-    SyntaxTree* expStmtTree = simple_exp();
-    if (LESSTHAN == tokens[index]->type || EQUAL == tokens[index]->type)
-    {
-        SyntaxTree* comparisonOpStmtTree = comparison_op();
-        comparisonOpStmtTree->add_child(expStmtTree);
-        comparisonOpStmtTree->add_child(simple_exp());
-        expStmtTree = comparisonOpStmtTree;
+SyntaxTree* Parser::exp (std::vector<Token> Tokens){
+    SyntaxTree* cur, *c1 = simple_exp(Tokens), *c2;
+    Token x;
+    if (index < Tokens.size())
+        x = Tokens[index];
+    if (x.Type == "LESSTHAN" || x.Type == "EQUAL") {
+        cur = comparison_op(Tokens);
+        cur->addChild(c1);
+        c2 = simple_exp(Tokens);
+        cur->addChild(c2);
+        c1 = cur;
     }
-    return expStmtTree;
+    return c1;
 }
 
+
+
+
 /* Rule: comparison-op → < | = */
-SyntaxTree* Parser::comparison_op()
-{
-    SyntaxTree* comparisonOpStmtTree = new SyntaxTree();
-    if (LESSTHAN == tokens[index]->type)
-    {
-        match(LESSTHAN);
-        comparisonOpStmtTree->add_node_data(OPERATOR_EXPRESSION, "<");
+SyntaxTree* Parser::comparison_op (std::vector<Token> Tokens){
+    Token x;
+    if (index < Tokens.size())
+        x = Tokens[index];
+    SyntaxTree *comparisonOpStmtTree = nullptr;
+    if(x.Type == "LESSTHAN"){
+        comparisonOpStmtTree = new SyntaxTree();
+        comparisonOpStmtTree->setType(OPERATOR_EXPRESSION);
+        comparisonOpStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("LESSTHAN",Tokens);
     }
-    else if (EQUAL == tokens[index]->type)
-    {
-        match(EQUAL);
-        comparisonOpStmtTree->add_node_data(OPERATOR_EXPRESSION, "=");
+    else if(x.Type == "EQUAL"){
+        comparisonOpStmtTree = new SyntaxTree();
+        comparisonOpStmtTree->setType(OPERATOR_EXPRESSION);
+        comparisonOpStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("EQUAL",Tokens);
     }
-    else
-    {
-        errors.insert(index);
+    else{
+        error = true;
+        err.insert(index);
     }
     return comparisonOpStmtTree;
 }
 
+
+
 /* Rule: simple-exp → simple-exp addop term | term
    EBNF: term {addop term}
 */
-SyntaxTree* Parser::simple_exp()
-{
-    SyntaxTree* simpleExpTree = term();
-    while (PLUS == tokens[index]->type || MINUS == tokens[index]->type)
-    {
-        SyntaxTree* addOpTree =  addop();
-        addOpTree->add_child(simpleExpTree);
-        addOpTree->add_child(term());
-        simpleExpTree = addOpTree;
+SyntaxTree* Parser::simple_exp(std::vector<Token> Tokens){
+    SyntaxTree *current, *c1 = term(Tokens), *c2;
+    Token x;
+    if(index<Tokens.size()){
+        x=Tokens[index];
     }
-    return simpleExpTree;
+    while (x.Type=="PLUS" || x.Type == "MINUS")
+    {
+        current = addop(Tokens);
+        current->addChild(c1);
+        c2 = term(Tokens);
+        current->addChild(c2);
+        c1 = current;
+        if(index<Tokens.size()){
+            x=Tokens[index];
+        }
+        else{
+            break;
+        }
+    }
+    return c1;
 }
 
+
+
 /* Rule: addop → + | - */
-SyntaxTree* Parser::addop()
-{
-    SyntaxTree* addOpTree = new SyntaxTree();
-    if (PLUS == tokens[index]->type)
-    {
-        match(PLUS);
-        addOpTree->add_node_data(OPERATOR_EXPRESSION, "+");
+SyntaxTree* Parser::addop(std::vector<Token> Tokens){
+    Token x;
+    if(index<Tokens.size()){
+        x = Tokens[index];
     }
-    else if (MINUS == tokens[index]->type)
-    {
-        match(MINUS);
-        addOpTree->add_node_data(OPERATOR_EXPRESSION, "-");
+    SyntaxTree *addOpTree = NULL;
+    if(x.Type == "PLUS"){
+        addOpTree = new SyntaxTree();
+        addOpTree->setType(OPERATOR_EXPRESSION);
+        addOpTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("PLUS",Tokens);
     }
-    else
-    {
-        errors.insert(index);
+    else if(x.Type == "MINUS"){
+        addOpTree = new SyntaxTree();
+        addOpTree->setType(OPERATOR_EXPRESSION);
+        addOpTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("MINUS",Tokens);
+    }
+    else{
+        error = true;
+        err.insert(index);
     }
     return addOpTree;
 }
 
+
+
 /* Rule: term → term mulop factor | factor
    EBNF: factor {mulop factor}
 */
-SyntaxTree* Parser::term()
+SyntaxTree* Parser::term(std::vector<Token> Tokens)
 {
-    SyntaxTree* termTree = factor();
-    while (MULT == tokens[index]->type || DIV == tokens[index]->type)
-    {
-        SyntaxTree* mulOpTree = mulop();
-        mulOpTree->add_child(termTree);
-        mulOpTree->add_child(factor());
-        termTree = mulOpTree;
+    SyntaxTree *current, *c1 = factor(Tokens), *c2;
+    Token x;
+    if(index<Tokens.size()){
+        x=Tokens[index];
     }
-    return termTree;
+    while (x.Type=="MULT" || x.Type == "DIV")
+    {
+        current = mulop(Tokens);
+        current->addChild(c1);
+        c2 = factor(Tokens);
+        current->addChild(c2);
+        c1 = current;
+        if(index<Tokens.size()){
+            x=Tokens[index];
+        }
+        else{
+            break;
+        }
+    }
+    return c1;
 }
 
+
 /* Rule: mulop → * | / */
-SyntaxTree* Parser::mulop()
-{
-    SyntaxTree* mulOpTree = new SyntaxTree();
-    if (MULT == tokens[index]->type)
-    {
-        match(MULT);
-        mulOpTree->add_node_data(OPERATOR_EXPRESSION, "*");
+SyntaxTree* Parser::mulop(std::vector<Token> Tokens){
+    Token x;
+    if(index<Tokens.size()){
+        x = Tokens[index];
     }
-    else if (DIV == tokens[index]->type)
-    {
-        match(DIV);
-        mulOpTree->add_node_data(OPERATOR_EXPRESSION, "/");
+    SyntaxTree *mulOpTree = NULL;
+    if(x.Type == "MULT"){
+        mulOpTree = new SyntaxTree();
+        mulOpTree->setType(OPERATOR_EXPRESSION);
+        mulOpTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("MULT",Tokens);
     }
-    else
-    {
-        errors.insert(index);
+    else if(x.Type == "DIV"){
+        mulOpTree = new SyntaxTree();
+        mulOpTree->setType(OPERATOR_EXPRESSION);
+        mulOpTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("DIV",Tokens);
+    }
+    else{
+        error = true;
+        err.insert(index);
     }
     return mulOpTree;
 }
 
+
+
 /* Rule: factor → (exp) | number | identifier */
-SyntaxTree* Parser::factor()
-{
-    SyntaxTree* factorTree = nullptr;
-    if (OPENBRACKET == tokens[index]->type)
-    {
-        match(OPENBRACKET);
-        factorTree = exp();
-        match(CLOSEDBRACKET);
+SyntaxTree* Parser::factor(std::vector<Token> Tokens){
+    Token x;
+    if(index<Tokens.size()){
+        x = Tokens[index];
     }
-    else if (NUMBER == tokens[index]->type)
-    {
-        match(NUMBER);
+    SyntaxTree *factorTree = NULL;
+    if(x.Type == "OPENBRACKET"){
+        match("OPENBRACKET",Tokens);
+        factorTree=exp(Tokens);
+        match("CLOSEDBRACKET",Tokens);
+    }
+    else if (x.Type == "NUMBER"){
         factorTree = new SyntaxTree();
-        factorTree->add_node_data(CONSTANT_EXPRESSION, tokens[index]->value);
+        factorTree->setType(CONSTANT_EXPRESSION);
+        factorTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("NUMBER",Tokens);
     }
-    else if (IDENTIFIER == tokens[index]->type)
-    {
-        match(IDENTIFIER);
+    else if (x.Type == "IDENTIFIER"){
         factorTree = new SyntaxTree();
-        factorTree->add_node_data(IDENTIFIER_EXPRESSION, tokens[index]->value);
+        factorTree->setType(IDENTIFIER_EXPRESSION);
+        factorTree->setValue(QString::fromStdString(Tokens[index].Value));
+        match("IDENTIFIER",Tokens);
     }
-    else
-    {
-        errors.insert(index);
+    else{
+        error = true;
+        err.insert(index);
     }
     return factorTree;
 }
 
+
 /* Update the index of the token */
-void Parser::match(TokenType tokenType)
+void Parser::match(QString input, std::vector<Token> Tokens)
 {
-    if(tokenType == tokens[index]->type)
+    if(index < Tokens.size())
     {
-        if(index < tokens.size() - 1)
+        if(input.toStdString() == Tokens[index].Type)
         {
-            index++;
+            if(index < Tokens.size() - 1)
+                index++;
         }
-        else
-        {
-            tokens[index]->type = EMPTY;
+        else{
+            error = true;
+            err.insert(index);
         }
     }
     else
     {
-        errors.insert(index);
+        error = true;
+        err.insert(index);
     }
+
+}
+
+
+void Parser::parseString(QString code)
+{
+    index = 0;
+    error=false;
+    err.clear();
+    syntaxTree = Parser::program(getTokenList(code.toStdString()));
+}
+
+SyntaxTree *Parser::getOutputTree()
+{
+    return syntaxTree;
+}
+
+
+
+bool Parser::getError() const
+{
+    std::cout<<error<<std::endl;
+    return error;
 }

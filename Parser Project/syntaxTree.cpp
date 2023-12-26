@@ -1,13 +1,66 @@
-#include "syntaxTree.hpp"
-#include <vector>
+#include "SyntaxTree.hpp"
 
-void SyntaxTree::add_child(SyntaxTree* child)
+SyntaxTree::SyntaxTree()
 {
-    childs.push_back(child);
+
 }
 
-void SyntaxTree::add_node_data(NodeType type, std::string value)
+const std::vector<SyntaxTree *> &SyntaxTree::getChildren() const
 {
-    nodeData.type = type;
-    nodeData.value = value;
+    return children;
+}
+
+void SyntaxTree::addChild(SyntaxTree *child)
+{
+    children.push_back(child);
+}
+
+bool SyntaxTree::isLeaf()
+{
+    return children.empty();
+}
+
+SyntaxTree *SyntaxTree::getSibling() const
+{
+    return sibling;
+}
+
+void SyntaxTree::setSibling(SyntaxTree *newSibling)
+{
+    sibling = newSibling;
+}
+
+bool SyntaxTree::hasSibling()
+{
+    return (sibling != nullptr);
+}
+
+NodeType SyntaxTree::getType() const
+{
+    return type;
+}
+
+void SyntaxTree::setType(NodeType newType)
+{
+    type = newType;
+}
+
+const QString &SyntaxTree::getValue() const
+{
+    return value;
+}
+
+void SyntaxTree::setValue(const QString &newValue)
+{
+    value = newValue;
+}
+
+SyntaxTree::~SyntaxTree()
+{
+    for (SyntaxTree *child: children)
+    {
+        delete child;
+        child = nullptr;
+    }
+    delete sibling;
 }

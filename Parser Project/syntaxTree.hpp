@@ -1,7 +1,7 @@
 #pragma once
-#include <string>
+
 #include <vector>
-#include <string>
+#include <QString>
 
 typedef enum{
     NO_EXPRESSION,
@@ -15,51 +15,35 @@ typedef enum{
     WRITE_STATEMENT
 }NodeType;
 
-
-typedef enum
-{
-    SEMICOLON,
-    IF,
-    THEN,
-    ELSE,
-    END,
-    REPEAT,
-    UNTIL,
-    IDENTIFIER,
-    ASSIGN,
-    READ,
-    WRITE,
-    LESSTHAN,
-    EQUAL,
-    PLUS,
-    MINUS,
-    MULT,
-    DIV,
-    OPENBRACKET,
-    CLOSEDBRACKET,
-    NUMBER,
-    EMPTY               /* Just to indicate the end of tokens */
-}TokenType;
-
-typedef struct 
-{
-    NodeType type;
-    std::string value;
-}NodeData;
-
-
-typedef struct
-{
-    TokenType type;
-    std::string value;
-}Token; 
-
 class SyntaxTree
 {
-    private:
-        std::vector<SyntaxTree*> childs;
-        NodeData nodeData;
-    public:
-        void add_child(SyntaxTree* child);
-        void add_node_data(NodeType type, std::string value);
+    std::vector<SyntaxTree *> children;
+    SyntaxTree *sibling = nullptr;
+    NodeType type = NO_EXPRESSION;
+    QString value = "";
+public:
+    SyntaxTree();
+
+    const std::vector<SyntaxTree *> &getChildren() const;
+
+    void addChild(SyntaxTree *child);
+
+    bool isLeaf();
+
+    SyntaxTree *getSibling() const;
+
+    void setSibling(SyntaxTree *newSibling);
+
+    bool hasSibling();
+
+    NodeType getType() const;
+
+    void setType(NodeType newType);
+
+    const QString &getValue() const;
+
+    void setValue(const QString &newValue);
+
+    ~SyntaxTree();
 };
+

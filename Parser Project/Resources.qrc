@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/Resources">
+        
+        <file>Resources/ASU.png</file>
+        <file>Resources/ASU_50.png</file>
+        <file>Resources/new.png</file>
+        <file>Resources/logos/file-open-2_30x30.png</file>
+        <file>Resources/logos/save.png</file>
+        <file>Resources/logos/file-open-2_1_50x50.png</file>
+        <file>Resources/logos/3820673-200_1_50x50.png</file>
+        <file>Resources/logos/compile.png</file>
+        <file>Resources/correct.png</file>
+        <file>Resources/wrong.png</file>
+        <file>Resources/logos/edit.png</file>
+        <file>Resources/logos/Tree.png</file>
+        <file>Resources/png-clipart-computer-icons-icon-design-house-symbol-qualifications-wales-main-menu-angle-building.png</file>
+        <file>Resources/logos/Home.png</file>
+        <file>Resources/logos/Pngtreevector_house_icon_4013710_100x100.png</file>
+        <file>Resources/logos/error.png</file>
+        <file>Resources/logos/about.png</file>
+        <file>Resources/logos/compiler.png</file>
+    </qresource>
+</RCC>
