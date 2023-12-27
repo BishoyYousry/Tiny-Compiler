@@ -25,33 +25,33 @@ void NodeDrawing::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
     QRectF rec = boundingRect();
     QBrush brush (Qt::white);
-/*
-    if(hovered)
-    {
-        brush.setColor(Qt::red);
-    }
-    else
-    {
-        brush.setColor(Qt::white);
-    }
-    */
+    /*
+  if(hovered)
+  {
+    brush.setColor(Qt::red);
+  }
+  else
+  {
+    brush.setColor(Qt::white);
+  }
+  */
 
     painter -> fillRect(rec,brush);
     painter -> setFont(QFont("Arial",12,-1,true));
     QString type="";
     /*
-     * typedef enum{
-    NO_EXPRESSION,
-    OPERATOR_EXPRESSION,
-    CONSTANT_EXPRESSION,
-    IDENTIFIER_EXPRESSION,
-    ASSIGN_STATEMENT,
-    IF_STATEMENT,
-    REPEAT_STATEMENT,
-    READ_STATEMENT,
-    WRITE_STATEMENT
+   * typedef enum{
+  NO_EXPRESSION,
+  OPERATOR_EXPRESSION,
+  CONSTANT_EXPRESSION,
+  IDENTIFIER_EXPRESSION,
+  ASSIGN_STATEMENT,
+  IF_STATEMENT,
+  REPEAT_STATEMENT,
+  READ_STATEMENT,
+  WRITE_STATEMENT
 }NodeType;
-     */
+   */
     switch(treeNode->getType())
     {
     case IF_STATEMENT:
@@ -91,7 +91,7 @@ void NodeDrawing::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
     else if(treeNode->getType() <= IDENTIFIER_EXPRESSION)
     {
-         painter->drawEllipse(rec);
+        painter->drawEllipse(rec);
     }
 }
 

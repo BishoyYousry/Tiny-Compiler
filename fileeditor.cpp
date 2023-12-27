@@ -4,7 +4,7 @@
 #include "qfiledialog.h"
 #include "compiler.hpp"
 #include <QMessageBox>
-//#include "SyntaxTreeWidget.h"
+
 Parser *P=new Parser();
 std::vector<Token> Tokens;
 std::string ScannerOutput;
@@ -147,7 +147,7 @@ void FileEditor::on_Compile_clicked()
     qInfo() <<"Compile clicked";
     ScannerOutput="";
      qInfo() <<"line 90";
-    Tokens= getTokenList(this->code);
+     Tokens= getTokenList(this->code);
      qInfo() <<"line 92";
      qInfo() <<(QString::fromStdString(std::to_string( Tokens.size())));
      qInfo() <<"line 94";

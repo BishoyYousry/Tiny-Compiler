@@ -321,7 +321,7 @@ vector<Token> getTokenList(string input){
     int index = 0;
     currentChar = 0;
     current_state = START;
-    while((index < (input.length()-1))&&!ErrorScanner){
+    while((index < (input.length()))&&!ErrorScanner){
         cout<<input.substr(index,input.length());
         string i=input.substr(index,input.length());
         cout<<i;

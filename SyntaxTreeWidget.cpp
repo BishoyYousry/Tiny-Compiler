@@ -2,88 +2,94 @@
 #include "qgraphicsview.h"
 #include "NodeDrawing.hpp"
 
-SyntaxTreeWidget::SyntaxTreeWidget(SyntaxTree *tree, QWidget *parent): QGraphicsView(parent)
-{
+// Constructor for the SyntaxTreeWidget class
+SyntaxTreeWidget::SyntaxTreeWidget(SyntaxTree *tree, QWidget *parent) : QGraphicsView(parent) {
 
+    // Create a new graphics scene to hold the tree visualization
     scene = new QGraphicsScene(this);
 
-    QPen blackPen (Qt::black);
+    // Set up a black pen with a width of 6 for drawing lines
+    QPen blackPen(Qt::black);
     blackPen.setWidth(6);
 
+    // Call the drawTree function to create the visual representation of the tree
     drawTree(tree);
 
-//    NodeDrawing *node1 = new NodeDrawing(tree, 10, 15);
-//    SyntaxTree *tree2 = new SyntaxTree();
-//    NodeDrawing *node2 = new NodeDrawing(tree2, 50, 100);
-//    QGraphicsLineItem *line = new QGraphicsLineItem(10+50, 15+50, 50+50, 100);
-//    scene->addItem(node1);
-//    scene->addItem(node2);
-//    scene->addItem(line);
-
+    // Set the scene to be displayed in the QGraphicsView
     this->setScene(scene);
 }
 
-int SyntaxTreeWidget::getTreeWidth(SyntaxTree *tree)
-{
+// Function to calculate the total width of the tree
+int SyntaxTreeWidget::getTreeWidth(SyntaxTree *tree) {
+    // If the tree is empty, return 0
     if (tree == nullptr) return 0;
-    if (tree->isLeaf() && !tree->hasSibling()) return NODE_WIDTH + NODE_HORIZONTAL_SEPARATION+20;
 
+    // If the tree is a leaf node and doesn't have a sibling, return its basic width
+    if (tree->isLeaf() && !tree->hasSibling()) return NODE_WIDTH + NODE_HORIZONTAL_SEPARATION + 20;
+
+    // Recursively calculate the widths of all subtrees
     int width = 0;
-    for (SyntaxTree *child: tree->getChildren())
-    {
+    for (SyntaxTree *child : tree->getChildren()) {
         width += getTreeWidth(child);
     }
-    if (tree->hasSibling()) width += getTreeWidth(tree->getSibling())+20;
+
+    // If the tree has a sibling, add its width as well
+    if (tree->hasSibling()) width += getTreeWidth(tree->getSibling()) + 20;
 
     return width;
 }
 
-void SyntaxTreeWidget::drawTree(SyntaxTree *tree, int x, int y)
-{
+// Function to recursively draw the tree
+void SyntaxTreeWidget::drawTree(SyntaxTree *tree, int x, int y) {
+    // Create a NodeDrawing object to represent the current node
     NodeDrawing *node = new NodeDrawing(tree, x, y);
     scene->addItem(node);
 
+    // Calculate the total width of all children
     int totalWidth = 0;
     std::vector<int> childrenWidths(tree->getChildren().size());
-    for (unsigned long long i = 0; i < tree->getChildren().size(); i++)
-    {
+    for (unsigned long long i = 0; i < tree->getChildren().size(); i++) {
         int childWidth = getTreeWidth(tree->getChildren()[i]);
         totalWidth += childWidth;
         childrenWidths[i] = childWidth;
     }
-    int currentLeftPos = x - totalWidth/2;
 
-    for (unsigned long long i = 0; i < tree->getChildren().size(); i++)
-    {
-        int childX = currentLeftPos + childrenWidths[i]/2;
+    // Calculate the starting position for the children
+    int currentLeftPos = x - totalWidth / 2;
+
+    // Draw each child node and connecting lines
+    for (unsigned long long i = 0; i < tree->getChildren().size(); i++) {
+        int childX = currentLeftPos + childrenWidths[i] / 2;
         int childY = y + NODE_VERTICAL_SEPARATION + NODE_HEIGHT;
 
-        QGraphicsLineItem *line = new QGraphicsLineItem(x, y + NODE_HEIGHT/2, childX, childY - NODE_HEIGHT/2);
+        // Draw a line connecting the parent and child nodes
+        QGraphicsLineItem *line = new QGraphicsLineItem(x, y + NODE_HEIGHT / 2, childX, childY - NODE_HEIGHT / 2);
         scene->addItem(line);
 
+        // Recursively draw the child tree
         drawTree(tree->getChildren()[i], childX, childY);
 
+        // Update the position for the next child
         currentLeftPos += childrenWidths[i];
-
     }
 
-    if(tree->hasSibling())
-    {
+    // If the tree has a sibling, draw it as well
+    if (tree->hasSibling()) {
+        // Calculate the width of the sibling tree
         int siblingWidth = 0;
-        for (SyntaxTree *child: tree->getSibling()->getChildren())
-        {
+        for (SyntaxTree *child : tree->getSibling()->getChildren()) {
             siblingWidth += getTreeWidth(child);
         }
 
-        int siblingX = x -30+ totalWidth/2 + siblingWidth/2;
+        // Calculate the position of the sibling node
+        int siblingX = x - 30 + totalWidth / 2 + siblingWidth / 2;
         int siblingY = y;
 
-        QGraphicsLineItem *line = new QGraphicsLineItem(x + NODE_WIDTH/2, y, siblingX - NODE_WIDTH/2, siblingY);
+        // Draw a line connecting the sibling nodes
+        QGraphicsLineItem *line = new QGraphicsLineItem(x + NODE_WIDTH / 2, y, siblingX - NODE_WIDTH / 2, siblingY);
         scene->addItem(line);
 
+        // Recursively draw the sibling tree
         drawTree(tree->getSibling(), siblingX, siblingY);
     }
 }
-
-
-
