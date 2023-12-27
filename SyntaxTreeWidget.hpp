@@ -8,7 +8,7 @@
 #include "SyntaxTree.hpp"
 
 #define NODE_VERTICAL_SEPARATION 50
-#define NODE_HORIZONTAL_SEPARATION 10
+#define NODE_HORIZONTAL_SEPARATION 200
 
 class SyntaxTreeWidget : public QGraphicsView
 {
