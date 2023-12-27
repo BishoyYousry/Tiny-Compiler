@@ -24,9 +24,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_NewFolder_clicked()
 {
-
-    //fileNames = QFileDialog::getOpenFileName(this, ("Open File"),"C://");
-    fileNames = QFileDialog::getSaveFileName(this, ("Open File"),"C://");
+    fileNames = QFileDialog::getSaveFileName(this, ("Open File"),"C://", ("Token files (*.token);;Tiny files (*.tiny)"));
     file=fileNames.toStdString();
     std::cout<<"mainwindow "<<file<<std::endl;
     FileEditor *F = new FileEditor;
@@ -35,28 +33,20 @@ void MainWindow::on_NewFolder_clicked()
     std::cout<<file<<std::endl;
     F->show();
     this->close();
-
-
-
-
-
-
 }
 
 
 void MainWindow::on_OpenFolder_clicked()
 {
-    fileNames = QFileDialog::getOpenFileName(this, ("Open File"),"C://");
+    fileNames = QFileDialog::getOpenFileName(this, ("Open File"),"C://", ("Token files (*.token);;Tiny files (*.tiny)"));
     file=fileNames.toStdString();
 
     std::ifstream MyReadFile(file);
     std::string carrier;
 
     temp="";
-    while (getline (MyReadFile,carrier)) {
-      // Output the text from the file
-      temp+=carrier+"\n";
-      //qInfo() << (QString::fromStdString(carrier));
+    while (getline (MyReadFile,carrier)) {      
+      temp+=carrier+"\n";      
     }
     FileEditor *F = new FileEditor;
     F->setAttribute(Qt::WA_DeleteOnClose);
@@ -68,9 +58,14 @@ void MainWindow::on_OpenFolder_clicked()
 }
 
 
+
+
 void MainWindow::on_AboutBTN_clicked()
 {
     AboutPage *A= new AboutPage;
     A->show();
 }
+
+
+
 

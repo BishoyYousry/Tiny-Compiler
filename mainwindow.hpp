@@ -29,6 +29,7 @@ private slots:
 
     void on_AboutBTN_clicked();
 
+
 private:
     Ui::MainWindow *ui;
 };
