@@ -12,11 +12,17 @@
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 
 ## **Description**
-The “Tiny” compiler is written in C++ and using the Qt framework. The 
-compiler takes a source code file as input and performs lexical analysis 
+The “Tiny” compiler written in C++ and using Qt framework. The compiler 
+can take (either a tiny source code written in *.tiny file or tiny tokens
+written in *.token file). The input file is (either by opening an existing file 
+or by creating a newer one). The compiler performs lexical analysis 
 (scanning) and syntactic analysis (parsing) to generate a syntax tree. The 
 syntax tree represents the structure and meaning of the source code. The 
-compiler can detect the errors in scanning process.
+syntax tree sets all statements inside rectangles, all expressions and the 
+unexpected values inside ellipses. The compiler can detect the errors in 
+scanning process. Also we can compiler more than one source code 
+without closing and reopening the compiler. 
+
 
 
 ## **Screenshots**
