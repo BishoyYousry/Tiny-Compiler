@@ -94,19 +94,19 @@ SyntaxTree* Parser::statement (std::vector<Token> Tokens){
 SyntaxTree* Parser::if_stmt (std::vector<Token> Tokens){
     SyntaxTree *ifStmtTree = new SyntaxTree();
     ifStmtTree->setType(IF_STATEMENT);
-    match("IF",Tokens);
+    match("IF",&Tokens);
     ifStmtTree->addChild(exp(Tokens));
-    match("THEN",Tokens);
+    match("THEN",&Tokens);
     ifStmtTree->addChild(stmt_sequence(Tokens));
     Token x;
     if(index<Tokens.size()){
         x = Tokens[index];
     }
     if(x.Type == "ELSE"){
-        match("ELSE",Tokens);
+        match("ELSE",&Tokens);
         ifStmtTree->addChild(stmt_sequence(Tokens));
     }
-    match("END",Tokens);
+    match("END",&Tokens);
     return ifStmtTree;
 }
 
@@ -114,10 +114,10 @@ SyntaxTree* Parser::if_stmt (std::vector<Token> Tokens){
 /* Rule: repeat-stmt → repeat stmt-sequence until exp */
 SyntaxTree* Parser::repeat_stmt (std::vector<Token> Tokens){
     SyntaxTree* repeatStmtTree = new SyntaxTree();
-    match("REPEAT", Tokens);
+    match("REPEAT", &Tokens);
     repeatStmtTree->setType(REPEAT_STATEMENT);
     repeatStmtTree->addChild(stmt_sequence(Tokens));
-    match("UNTIL", Tokens);
+    match("UNTIL", &Tokens);
     repeatStmtTree->addChild(exp(Tokens));
     return repeatStmtTree;
 }
@@ -129,8 +129,8 @@ SyntaxTree* Parser::assign_stmt (std::vector<Token> Tokens){
     SyntaxTree* assignStmtTree = new SyntaxTree();
     assignStmtTree->setType(ASSIGN_STATEMENT);
     assignStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
-    match("IDENTIFIER",Tokens);
-    match("ASSIGN", Tokens);
+    match("IDENTIFIER", &Tokens);
+    match("ASSIGN", &Tokens);
     assignStmtTree->addChild(exp(Tokens));
     return assignStmtTree;
 }
@@ -139,11 +139,11 @@ SyntaxTree* Parser::assign_stmt (std::vector<Token> Tokens){
 
 /* Rule: read-stmt → read identifier */
 SyntaxTree* Parser::read_stmt (std::vector<Token> Tokens){
-    match("READ",Tokens);
+    match("READ", &Tokens);
     SyntaxTree *readStmtTree = new SyntaxTree();
     readStmtTree->setType(READ_STATEMENT);
     readStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
-    match("IDENTIFIER",Tokens);
+    match("IDENTIFIER", &Tokens);
     return readStmtTree;
 }
 
@@ -153,7 +153,7 @@ SyntaxTree* Parser::read_stmt (std::vector<Token> Tokens){
 SyntaxTree* Parser::write_stmt (std::vector<Token> Tokens){
     SyntaxTree *writeStmtTree= new SyntaxTree();
     writeStmtTree->setType(WRITE_STATEMENT);
-    match("WRITE",Tokens);
+    match("WRITE", &Tokens);
     writeStmtTree->addChild(exp(Tokens));
     return writeStmtTree;
 }
@@ -191,13 +191,13 @@ SyntaxTree* Parser::comparison_op (std::vector<Token> Tokens){
         comparisonOpStmtTree = new SyntaxTree();
         comparisonOpStmtTree->setType(OPERATOR_EXPRESSION);
         comparisonOpStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("LESSTHAN",Tokens);
+        match("LESSTHAN", &Tokens);
     }
     else if(x.Type == "EQUAL"){
         comparisonOpStmtTree = new SyntaxTree();
         comparisonOpStmtTree->setType(OPERATOR_EXPRESSION);
         comparisonOpStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("EQUAL",Tokens);
+        match("EQUAL", &Tokens);
     }
     else{
         error = true;
@@ -247,13 +247,13 @@ SyntaxTree* Parser::addop(std::vector<Token> Tokens){
         addOpTree = new SyntaxTree();
         addOpTree->setType(OPERATOR_EXPRESSION);
         addOpTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("PLUS",Tokens);
+        match("PLUS", &Tokens);
     }
     else if(x.Type == "MINUS"){
         addOpTree = new SyntaxTree();
         addOpTree->setType(OPERATOR_EXPRESSION);
         addOpTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("MINUS",Tokens);
+        match("MINUS", &Tokens);
     }
     else{
         error = true;
@@ -303,13 +303,13 @@ SyntaxTree* Parser::mulop(std::vector<Token> Tokens){
         mulOpTree = new SyntaxTree();
         mulOpTree->setType(OPERATOR_EXPRESSION);
         mulOpTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("MULT",Tokens);
+        match("MULT", &Tokens);
     }
     else if(x.Type == "DIV"){
         mulOpTree = new SyntaxTree();
         mulOpTree->setType(OPERATOR_EXPRESSION);
         mulOpTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("DIV",Tokens);
+        match("DIV", &Tokens);
     }
     else{
         error = true;
@@ -328,43 +328,27 @@ SyntaxTree* Parser::factor(std::vector<Token> Tokens){
     }
     SyntaxTree *factorTree = NULL;
     if(x.Type == "OPENBRACKET"){
-        match("OPENBRACKET",Tokens);
+        match("OPENBRACKET", &Tokens);
         factorTree=exp(Tokens);
-        match("CLOSEDBRACKET",Tokens);
+        match("CLOSEDBRACKET", &Tokens);
     }
     else if (x.Type == "NUMBER"){
         factorTree = new SyntaxTree();
         factorTree->setType(CONSTANT_EXPRESSION);
         factorTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("NUMBER",Tokens);
+        match("NUMBER", &Tokens);
     }
     else if (x.Type == "IDENTIFIER"){
         factorTree = new SyntaxTree();
         factorTree->setType(IDENTIFIER_EXPRESSION);
         factorTree->setValue(QString::fromStdString(Tokens[index].Value));
-        match("IDENTIFIER",Tokens);
+        match("IDENTIFIER", &Tokens);
     }
     else{
         error = true;
         err.insert(index);
     }
     return factorTree;
-}
-
-
-/* Update the index of the token */
-void Parser::match(QString input, std::vector<Token> Tokens)
-{
-
-    if(input.toStdString() == Tokens[index].Type)
-    {
-        if(index < Tokens.size() - 1)
-            index++;
-    }
-    else{
-        error = true;
-        err.insert(index);
-    }
 }
 
 
