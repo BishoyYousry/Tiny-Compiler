@@ -11,7 +11,7 @@ Parser::Parser()
 
 
 /* Rule: program → stmt-sequence */
-SyntaxTree* Parser::program (std::vector<Token> Tokens){
+SyntaxTree* Parser::program (std::vector<Token>& Tokens){
 
     SyntaxTree* programTree = stmt_sequence(Tokens);
     if (index < Tokens.size()-1) {
@@ -27,7 +27,7 @@ SyntaxTree* Parser::program (std::vector<Token> Tokens){
     Rule: stmt-sequence → stmt-sequence ; statement | statement
     EBNF: stmt-sequence → statement {; statement}
 */
-SyntaxTree* Parser::stmt_sequence (std::vector<Token> Tokens){
+SyntaxTree* Parser::stmt_sequence (std::vector<Token>& Tokens){
     SyntaxTree *stmtSequenceTree = new SyntaxTree();
 
     stmtSequenceTree = statement(Tokens);
@@ -64,7 +64,7 @@ SyntaxTree* Parser::stmt_sequence (std::vector<Token> Tokens){
 
 
 /* Rule: statement → if-stmt | repeat-stmt | assign-stmt | read-stmt | write-stmt */
-SyntaxTree* Parser::statement (std::vector<Token> Tokens){
+SyntaxTree* Parser::statement (std::vector<Token>& Tokens){
     SyntaxTree* statementTree = NULL;
     Token current_token;
     if(index < Tokens.size())
@@ -79,7 +79,8 @@ SyntaxTree* Parser::statement (std::vector<Token> Tokens){
         statementTree = write_stmt(Tokens);
     else if (current_token.Type == "REPEAT")
         statementTree = repeat_stmt(Tokens);
-    else{
+    else
+    {
         error = true;
         err.insert(index);
     }
@@ -92,7 +93,7 @@ SyntaxTree* Parser::statement (std::vector<Token> Tokens){
     Rule: if-stmt → if exp then stmt-sequence end | if exp then stmt-sequence else stmt-sequence end
     EBNF: if-stmt → if exp then stmt-sequence [else stmt-sequence] end
 */
-SyntaxTree* Parser::if_stmt (std::vector<Token> Tokens){
+SyntaxTree* Parser::if_stmt (std::vector<Token>& Tokens){
     SyntaxTree *ifStmtTree = new SyntaxTree();
     ifStmtTree->setType(IF_STATEMENT);
     match("IF",&Tokens);
@@ -113,7 +114,7 @@ SyntaxTree* Parser::if_stmt (std::vector<Token> Tokens){
 
 
 /* Rule: repeat-stmt → repeat stmt-sequence until exp */
-SyntaxTree* Parser::repeat_stmt (std::vector<Token> Tokens){
+SyntaxTree* Parser::repeat_stmt (std::vector<Token>& Tokens){
     SyntaxTree* repeatStmtTree = new SyntaxTree();
     match("REPEAT", &Tokens);
     repeatStmtTree->setType(REPEAT_STATEMENT);
@@ -126,7 +127,7 @@ SyntaxTree* Parser::repeat_stmt (std::vector<Token> Tokens){
 
 
 /* Rule: assign-stmt → identifier := exp */
-SyntaxTree* Parser::assign_stmt (std::vector<Token> Tokens){
+SyntaxTree* Parser::assign_stmt (std::vector<Token>& Tokens){
     SyntaxTree* assignStmtTree = new SyntaxTree();
     assignStmtTree->setType(ASSIGN_STATEMENT);
     assignStmtTree->setValue(QString::fromStdString(Tokens[index].Value));
@@ -139,7 +140,7 @@ SyntaxTree* Parser::assign_stmt (std::vector<Token> Tokens){
 
 
 /* Rule: read-stmt → read identifier */
-SyntaxTree* Parser::read_stmt (std::vector<Token> Tokens){
+SyntaxTree* Parser::read_stmt (std::vector<Token>& Tokens){
     match("READ", &Tokens);
     SyntaxTree *readStmtTree = new SyntaxTree();
     readStmtTree->setType(READ_STATEMENT);
@@ -151,7 +152,7 @@ SyntaxTree* Parser::read_stmt (std::vector<Token> Tokens){
 
 
 /* Rule: write-stmt → write exp */
-SyntaxTree* Parser::write_stmt (std::vector<Token> Tokens){
+SyntaxTree* Parser::write_stmt (std::vector<Token>& Tokens){
     SyntaxTree *writeStmtTree= new SyntaxTree();
     writeStmtTree->setType(WRITE_STATEMENT);
     match("WRITE", &Tokens);
@@ -164,7 +165,7 @@ SyntaxTree* Parser::write_stmt (std::vector<Token> Tokens){
 /* Rule: exp → simple-exp comparison-op simple-exp | simple-exp
    EBNF: exp → simple-exp [comparison-op simple-exp]
 */
-SyntaxTree* Parser::exp (std::vector<Token> Tokens){
+SyntaxTree* Parser::exp (std::vector<Token>& Tokens){
     SyntaxTree* cur, *c1 = simple_exp(Tokens), *c2;
     Token x;
     if (index < Tokens.size())
@@ -183,7 +184,7 @@ SyntaxTree* Parser::exp (std::vector<Token> Tokens){
 
 
 /* Rule: comparison-op → < | = */
-SyntaxTree* Parser::comparison_op (std::vector<Token> Tokens){
+SyntaxTree* Parser::comparison_op (std::vector<Token>& Tokens){
     Token x;
     if (index < Tokens.size())
         x = Tokens[index];
@@ -212,7 +213,7 @@ SyntaxTree* Parser::comparison_op (std::vector<Token> Tokens){
 /* Rule: simple-exp → simple-exp addop term | term
    EBNF: term {addop term}
 */
-SyntaxTree* Parser::simple_exp(std::vector<Token> Tokens){
+SyntaxTree* Parser::simple_exp(std::vector<Token>& Tokens){
     SyntaxTree *current, *c1 = term(Tokens), *c2;
     Token x;
     if(index<Tokens.size()){
@@ -238,7 +239,7 @@ SyntaxTree* Parser::simple_exp(std::vector<Token> Tokens){
 
 
 /* Rule: addop → + | - */
-SyntaxTree* Parser::addop(std::vector<Token> Tokens){
+SyntaxTree* Parser::addop(std::vector<Token>& Tokens){
     Token x;
     if(index<Tokens.size()){
         x = Tokens[index];
@@ -268,7 +269,7 @@ SyntaxTree* Parser::addop(std::vector<Token> Tokens){
 /* Rule: term → term mulop factor | factor
    EBNF: factor {mulop factor}
 */
-SyntaxTree* Parser::term(std::vector<Token> Tokens)
+SyntaxTree* Parser::term(std::vector<Token>& Tokens)
 {
     SyntaxTree *current, *c1 = factor(Tokens), *c2;
     Token x;
@@ -294,7 +295,7 @@ SyntaxTree* Parser::term(std::vector<Token> Tokens)
 
 
 /* Rule: mulop → * | / */
-SyntaxTree* Parser::mulop(std::vector<Token> Tokens){
+SyntaxTree* Parser::mulop(std::vector<Token>& Tokens){
     Token x;
     if(index<Tokens.size()){
         x = Tokens[index];
@@ -322,7 +323,7 @@ SyntaxTree* Parser::mulop(std::vector<Token> Tokens){
 
 
 /* Rule: factor → (exp) | number | identifier */
-SyntaxTree* Parser::factor(std::vector<Token> Tokens){
+SyntaxTree* Parser::factor(std::vector<Token>& Tokens){
     Token x;
     if(index<Tokens.size()){
         x = Tokens[index];
@@ -377,9 +378,17 @@ void Parser::parseString(QString code)
     error=false;
     err.clear();
     if(extension == "tiny")
-        syntaxTree = Parser::program(getTokenList(code.toStdString()));
+    {
+        std::vector<Token> tokens = getTokenList(code.toStdString());
+        syntaxTree = Parser::program(tokens);
+    }
+
     else if(extension == "token")
-        syntaxTree = Parser::program(extractTokens(code.toStdString()));
+    {
+        std::vector<Token> tokens = extractTokens(code.toStdString());
+        syntaxTree = Parser::program(tokens);
+    }
+
 }
 
 SyntaxTree *Parser::getOutputTree()

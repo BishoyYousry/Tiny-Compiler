@@ -318,7 +318,8 @@ Token getToken(string Code) {
 }
 
 
-vector<Token> getTokenList(string input){
+vector<Token>getTokenList(string input)
+{
     vector<Token> tokens;
     Token token;
     int index = 0;

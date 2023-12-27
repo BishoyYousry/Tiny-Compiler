@@ -81,8 +81,17 @@ void SyntaxTreeWidget::drawTree(SyntaxTree *tree, int x, int y) {
             siblingWidth += getTreeWidth(child);
         }
 
-        // Calculate the position of the sibling node
-        int siblingX = x - 30 + totalWidth / 2 + siblingWidth / 2;
+        int siblingX;
+        if(tree->getType() != READ_STATEMENT)
+        {
+            // Calculate the position of the sibling node
+            siblingX = x - 30 + totalWidth / 2 + siblingWidth / 2;
+        }
+        else
+        {
+            // Calculate the position of the sibling node
+            siblingX = 150 + x + totalWidth / 2 + siblingWidth / 2;
+        }
         int siblingY = y;
 
         // Draw a line connecting the sibling nodes
