@@ -7,6 +7,7 @@
 QString fileNames;
 std::string file;
 std::string temp="";
+QString extension;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,6 +27,11 @@ void MainWindow::on_NewFolder_clicked()
 {
     fileNames = QFileDialog::getSaveFileName(this, ("Open File"),"C://", ("Token files (*.token);;Tiny files (*.tiny)"));
     file=fileNames.toStdString();
+
+    // Extract file extension using QFileInfo
+    QFileInfo fileInfo(fileNames);
+    extension = fileInfo.completeSuffix();
+
     std::cout<<"mainwindow "<<file<<std::endl;
     FileEditor *F = new FileEditor;
     F->setAttribute(Qt::WA_DeleteOnClose);
@@ -43,6 +49,10 @@ void MainWindow::on_OpenFolder_clicked()
 
     std::ifstream MyReadFile(file);
     std::string carrier;
+
+    // Extract file extension using QFileInfo
+    QFileInfo fileInfo(fileNames);
+    extension = fileInfo.completeSuffix();
 
     temp="";
     while (getline (MyReadFile,carrier)) {      

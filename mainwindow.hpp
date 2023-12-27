@@ -10,6 +10,8 @@
 
 extern std::string temp;
 extern  std::string file;
+extern QString extension;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE

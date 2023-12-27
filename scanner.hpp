@@ -9,4 +9,5 @@ struct Token{
 };
 
 std::vector<Token> getTokenList(std::string input);
+std::vector<Token> extractTokens(std::string input);
 Token getToken(std:: string Code);

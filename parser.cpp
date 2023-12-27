@@ -1,6 +1,7 @@
 #include "parser.hpp"
 #include <QString>
 
+extern QString extension;
 
 Parser::Parser()
 {
@@ -375,7 +376,10 @@ void Parser::parseString(QString code)
     index = 0;
     error=false;
     err.clear();
-    syntaxTree = Parser::program(getTokenList(code.toStdString()));
+    if(extension == "tiny")
+        syntaxTree = Parser::program(getTokenList(code.toStdString()));
+    else if(extension == "token")
+        syntaxTree = Parser::program(extractTokens(code.toStdString()));
 }
 
 SyntaxTree *Parser::getOutputTree()

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <QStringList>
 #include "scanner.hpp"
 using namespace std;
 int currentChar = 0;
@@ -315,13 +316,19 @@ Token getToken(string Code) {
         }
     }
 }
+
+
 vector<Token> getTokenList(string input){
     vector<Token> tokens;
     Token token;
     int index = 0;
     currentChar = 0;
     current_state = START;
-    while((index < (input.length()))&&!ErrorScanner){
+
+    // Convert the input string to a QString object
+    QString qinput = QString::fromStdString(input);
+
+    while((index < (input.length()))&&!ErrorScanner ){
         cout<<input.substr(index,input.length());
         string i=input.substr(index,input.length());
         cout<<i;
@@ -334,3 +341,38 @@ vector<Token> getTokenList(string input){
     return tokens;
 }
 
+
+// Define the qt function caller extractTokens
+vector<Token> extractTokens(string input) {
+    // Create an empty vector of Tokens
+    vector<Token> tokens;
+
+    // Remove all spaces in the input string
+    input.erase(remove(input.begin(), input.end(), ' '), input.end());
+
+    // Convert the input string to a QString object
+    QString qinput = QString::fromStdString(input);
+
+    // Split the QString object by newline characters
+    QStringList lines = qinput.split("\n");
+
+    // Loop through each line
+    for (QString line : lines) {
+        // Split the line by colon characters
+        QStringList parts = line.split(",");
+
+        // Check if the line has exactly two parts
+        if (parts.size() == 2) {
+            // Create a new Token with the value and type from the parts
+            Token token;
+            token.Value = parts[0].toStdString();
+            token.Type = parts[1].toStdString();
+
+            // Append the Token to the vector
+            tokens.push_back(token);
+        }
+    }
+
+    // Return the vector of Tokens
+    return tokens;
+}

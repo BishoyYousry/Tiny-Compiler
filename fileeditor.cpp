@@ -72,7 +72,7 @@ void FileEditor::on_Save_clicked()
 
 void FileEditor::on_OpenFile_clicked()
 {
-    QString fileNames = QFileDialog::getOpenFileName(this, ("Open File"),"C://");
+    QString fileNames = QFileDialog::getOpenFileName(this, ("Open File"),"C://", ("Token files (*.token);;Tiny files (*.tiny)"));
     file=fileNames.toStdString();
     if(file!="")
     {
@@ -114,7 +114,7 @@ void FileEditor::on_OpenFile_3_clicked()
 
 void FileEditor::on_NewFile_clicked()
 {
-    QString fileNames = QFileDialog::getSaveFileName(this, ("Open File"),"C://");
+    QString fileNames = QFileDialog::getSaveFileName(this, ("Open File"),"C://", ("Token files (*.token);;Tiny files (*.tiny)"));
     file=fileNames.toStdString();
     if(file!="")
     {
@@ -138,46 +138,43 @@ void FileEditor::on_Compile_clicked()
     if(this->fileName=="")
     {
         QMessageBox msgBox;
-        msgBox.setText("Please save the code into a file first");
+        msgBox.setText("Please save the content into a file first");
         msgBox.exec();
     }
     else
     {
-    SaveProcedure();
-    qInfo() <<"Compile clicked";
-    ScannerOutput="";
-     qInfo() <<"line 90";
-     Tokens= getTokenList(this->code);
-     qInfo() <<"line 92";
-     qInfo() <<(QString::fromStdString(std::to_string( Tokens.size())));
-     qInfo() <<"line 94";
-    for(int loop=0;loop<Tokens.size();loop++)
-    {
+        SaveProcedure();
+        qInfo() <<"Compile clicked";
+        ScannerOutput="";
+        if(extension == "tiny")
+            Tokens= getTokenList(this->code);
+        else if(extension == "token")
+            Tokens= extractTokens(this->code);
+        for(int loop=0;loop<Tokens.size();loop++)
+        {
+            if(!ErrorScanner)
+            {
+                if(Tokens[loop].Value != "")
+                    ScannerOutput+=Tokens[loop].Value+",  "+Tokens[loop].Type+"\n";
+            }
+            else
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Error in Scanner");
+                msgBox.exec();
+                break;
+            }
+        }
         if(!ErrorScanner)
         {
-        qInfo() <<"line 96";
-        ScannerOutput+=Tokens[loop].Value+",  "+Tokens[loop].Type+"\n";
-        qInfo() <<(QString::fromStdString(Tokens[loop].Type+"  "+Tokens[loop].Value+"\n"));
+            P->parseString(QString::fromStdString(this->code));
+            std::cout<<P->getError()<<std::endl;
+            GrammerIsTrue=!(P->getError());
+            Compiler *C = new Compiler;
+            C->setAttribute(Qt::WA_DeleteOnClose);
+            C->show();
+            this->close();
         }
-        else
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Error in Scanner");
-            msgBox.exec();
-            break;
-        }
-    }
-    if(!ErrorScanner)
-    {
-        P->parseString(QString::fromStdString(this->code));
-        std::cout<<"CHECK ERROR 333333333333333333333333333333333333333333333333333333333333"<<std::endl;
-        std::cout<<P->getError()<<std::endl;
-        GrammerIsTrue=!(P->getError());
-        Compiler *C = new Compiler;
-        C->setAttribute(Qt::WA_DeleteOnClose);
-        C->show();
-        this->close();
-    }
 
     }
 }
