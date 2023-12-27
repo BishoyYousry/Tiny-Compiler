@@ -28,6 +28,7 @@ private:
     SyntaxTree* mulop(std::vector<Token> Tokens);
     SyntaxTree* factor(std::vector<Token> Tokens);
     void match(QString input, std::vector<Token> Tokens);
+    void match(QString input, std::vector<Token>* Tokens);
 
 public:
     Parser();

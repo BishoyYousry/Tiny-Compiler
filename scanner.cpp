@@ -329,10 +329,8 @@ vector<Token> getTokenList(string input){
         tokens.push_back(token);
         index=currentChar+1;
     }
-    index=0;
     cout<<"finished";
     cout<<tokens.size();
     return tokens;
-
 }
 

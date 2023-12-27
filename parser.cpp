@@ -41,9 +41,9 @@ SyntaxTree* Parser::stmt_sequence (std::vector<Token> Tokens){
         x = Tokens[index];
     }
 
-    while (x.Type == "SEMICOLON" && index != Tokens.size()-1){
+    while (x.Type == "SEMICOLON" && index < Tokens.size()){
 
-        match("SEMICOLON",Tokens);
+        match("SEMICOLON", &Tokens);
 
         current->setSibling(statement(Tokens));
 
@@ -355,24 +355,34 @@ SyntaxTree* Parser::factor(std::vector<Token> Tokens){
 /* Update the index of the token */
 void Parser::match(QString input, std::vector<Token> Tokens)
 {
-    if(index < Tokens.size())
+
+    if(input.toStdString() == Tokens[index].Type)
     {
-        if(input.toStdString() == Tokens[index].Type)
-        {
-            if(index < Tokens.size() - 1)
-                index++;
-        }
-        else{
-            error = true;
-            err.insert(index);
-        }
+        if(index < Tokens.size() - 1)
+            index++;
     }
-    else
-    {
+    else{
         error = true;
         err.insert(index);
     }
+}
 
+
+/* Update the index of the token */
+void Parser::match(QString input, std::vector<Token>* Tokens)
+{
+
+    if(input.toStdString() == Tokens->at(index).Type)
+    {
+        if(index < Tokens->size() - 1)
+            index++;
+        else    /* Semicolon at the end of the code */
+            Tokens->at(index).Type = "ERROR";    /* Change the token type to avoid the inf loop in stmt-seq function */
+    }
+    else{
+        error = true;
+        err.insert(index);
+    }
 }
 
 
